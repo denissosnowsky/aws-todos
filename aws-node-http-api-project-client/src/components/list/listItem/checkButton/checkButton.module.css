@@ -1,0 +1,10 @@
+.checkWrapper {
+  height: 50px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+}
+
+.checkWrapper span {
+  margin: 0 auto;
+}

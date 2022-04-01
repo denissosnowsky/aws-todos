@@ -1,42 +1,37 @@
-import { useEffect, useState, VFC } from "react";
+import { useContext, useEffect, useState, VFC } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import { TextField } from "@mui/material";
 
 import s from "./home.module.css";
 import { ListFC } from "../../components/list/list";
-import axios from "axios";
 import { TodoItem } from "../../types/todoItem";
 import { Loading } from "../../components/loading/loading";
-import { TextField } from "@mui/material";
 import { dateTodosSorting } from "../../utils/dateTodosSorting";
+import apiService from "../../service/api.service";
+import { AuthContext } from "../../contexts/AuthContext";
+import { notifyErrorAlert } from "../../utils/notifyErrorAlert";
 
 export const Home: VFC = () => {
+  const [updatingId, setUpdatingId] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [list, setList] = useState<TodoItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAddLoading, setIsAddLoading] = useState(false);
-  const [updatingId, setUpdatingId] = useState("");
   const [deleteingId, setDeleteingId] = useState("");
-  const [inputValue, setInputValue] = useState("");
+  const [isAddLoading, setIsAddLoading] = useState(false);
+  const { setErrorAlert } = useContext(AuthContext)!;
 
   useEffect(() => {
     const fetchList = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get<TodoItem[]>(
-          "https://w896wj0aol.execute-api.us-east-1.amazonaws.com/dev/todos",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("aws-token")}`,
-            },
-          }
-        );
-        setList(res.data);
-        setIsLoading(false);
+        const res = await apiService.get<TodoItem[]>("/todos");
+        setList(res);
       } catch (e) {
-        setIsLoading(false);
-        console.log(e);
+        notifyErrorAlert("", setErrorAlert);
       }
+      setIsLoading(false);
     };
     fetchList();
   }, []);
@@ -45,65 +40,42 @@ export const Home: VFC = () => {
     try {
       if (inputValue.length > 0) {
         setIsAddLoading(true);
-        const newItem = await axios.post<TodoItem>(
-          "https://w896wj0aol.execute-api.us-east-1.amazonaws.com/dev/todos",
-          {
-            todo: inputValue,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("aws-token")}`,
-            },
-          }
-        );
-        setList((list) => [newItem.data, ...list]);
+        const newItem = await apiService.post<TodoItem>("/todos", {
+          todo: inputValue,
+        });
+        setList((list) => [newItem, ...list]);
         setInputValue("");
-        setIsAddLoading(false);
       }
     } catch (e) {
-      setIsAddLoading(false);
+      notifyErrorAlert("Some error happened, try again", setErrorAlert);
     }
+    setIsAddLoading(false);
   };
 
   const handlerDelete = async (id: string) => {
     try {
       setDeleteingId(id);
-      await axios.delete<void>(
-        `https://w896wj0aol.execute-api.us-east-1.amazonaws.com/dev/todo/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("aws-token")}`,
-          },
-        }
-      );
+      await apiService.delete<void>(`/todo/${id}`);
       setList(list.filter((item) => item.id !== id));
-      setDeleteingId("");
     } catch (e) {
-      setDeleteingId("");
+      notifyErrorAlert("Some error happened, try again", setErrorAlert);
     }
+    setDeleteingId("");
   };
 
   const handlerUpdate = async (id: string, completed: boolean) => {
     try {
       setUpdatingId(id);
-      await axios.put<unknown>(
-        `https://w896wj0aol.execute-api.us-east-1.amazonaws.com/dev/todo/${id}`,
-        {
-          completed,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("aws-token")}`,
-          },
-        }
-      );
+      await apiService.put<unknown>(`/todo/${id}`, {
+        completed,
+      });
       setList(
         list.map((item) => (item.id === id ? { ...item, completed } : item))
       );
-      setUpdatingId("");
     } catch (e) {
-      setUpdatingId("");
+      notifyErrorAlert("Some error happened, try again", setErrorAlert);
     }
+    setUpdatingId("");
   };
 
   return (
@@ -117,7 +89,6 @@ export const Home: VFC = () => {
         <div className={s.wrapper}>
           <div className={s.inputWrapper}>
             <TextField
-              id="standard-basic"
               label="Input new item..."
               variant="standard"
               fullWidth

@@ -8,31 +8,28 @@ import { Auth } from "./pages/auth/auth";
 import { Navbar } from "./components/navbar/navbar";
 import { Password } from "./pages/password/password";
 import { Loading } from "./components/loading/loading";
-import { AlertLayout } from "./components/AlertLayout/alertLayout";
+import { AlertLayout } from "./components/alertLayout/alertLayout";
+import { notifyErrorAlert } from "./utils/notifyErrorAlert";
 
 function App() {
-  const { isAuth, getSession, logout, successAlert } = useContext(AuthContext)!;
-  const [isInitializing, setUsInitializing] = useState(true);
+  const { isAuth, getSession, successAlert, errorAlert, setErrorAlert } =
+    useContext(AuthContext)!;
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     const isUserAuth = async () => {
       try {
-        const session = await getSession();
-        if (session) {
-          console.log(session);
-        }
-        setUsInitializing(false);
+        await getSession();
       } catch (e) {
-        console.log(e);
-        setUsInitializing(false);
+        return (
+          e !== "Not authorized" &&
+          notifyErrorAlert(JSON.stringify(e), setErrorAlert)
+        );
+      } finally {
+        setIsInitializing(false);
       }
     };
     isUserAuth();
-
-    const token = localStorage.getItem("aws-token");
-    if(!token){
-      logout();
-    }
   }, []);
 
   if (isInitializing) {
@@ -40,7 +37,10 @@ function App() {
   }
 
   return (
-    <AlertLayout type="success" text={successAlert}> 
+    <AlertLayout
+      type={errorAlert ? "error" : "success"}
+      text={errorAlert ? errorAlert : successAlert}
+    >
       {!isAuth ? (
         <Auth />
       ) : (

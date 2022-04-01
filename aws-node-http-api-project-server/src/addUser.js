@@ -4,6 +4,8 @@ const AWS = require("aws-sdk");
 const middy = require("@middy/core");
 const httpJsonBodyParser = require("@middy/http-json-body-parser");
 
+const headers = require("../utils/headers");
+
 const addUser = async (event) => {
   try {
     const dynamodb = new AWS.DynamoDB.DocumentClient();
@@ -27,17 +29,15 @@ const addUser = async (event) => {
 
     return {
       statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "X-Requested-With": "*",
-        "Access-Control-Allow-Headers": "X-requested-with,Content-type,Accept,Origin,Authorization,Access-Control-Allow-Headers,Access-Control-Allow-Origin,Access-Control-Allow-Methods",
-        "Access-Control-Allow-Methods": "POST,GET,OPTIONS"
-      },
+      headers,
       body: JSON.stringify(newUser),
     };
   } catch (e) {
-    console.log(e);
-    return e;
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify(e.message),
+    };
   }
 };
 

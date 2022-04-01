@@ -2,15 +2,17 @@
 const AWS = require("aws-sdk");
 const jwt = require("jsonwebtoken");
 
+const headers = require("../utils/headers");
+const parseTokenDateFromEvent = require("../utils/parseTokenDateFromEvent");
+
 const fetchTodos = async (event) => {
+  try {
   let todos;
 
-  const token = event.headers["Authorization"].split(" ")[1];
-  const decoded = jwt.decode(token);
-  const userId = decoded["cognito:username"];
+  const decodedDataFromToken = parseTokenDateFromEvent(event);
+  const userId = decodedDataFromToken["cognito:username"];
   const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-  try {
     const results = await dynamodb
       .scan({
         TableName: "todosTable",
@@ -21,21 +23,19 @@ const fetchTodos = async (event) => {
       })
       .promise();
     todos = results.Items;
-  } catch {
-    console.log(error);
+    
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(todos),
+    };
+  } catch(e) {
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify(e.message),
+    };
   }
-
-  return {
-    statusCode: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "X-Requested-With": "*",
-      "Access-Control-Allow-Headers":
-        "X-requested-with,Content-type,Accept,Origin,Authorization,Access-Control-Allow-Headers,Access-Control-Allow-Origin,Access-Control-Allow-Methods",
-      "Access-Control-Allow-Methods": "POST,GET,OPTIONS",
-    },
-    body: JSON.stringify(todos),
-  };
 };
 
 module.exports = {

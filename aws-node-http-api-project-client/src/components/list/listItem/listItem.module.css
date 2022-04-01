@@ -1,0 +1,15 @@
+.itemButtons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.id {
+  padding-right: 10px;
+}
+
+.text span {
+  font-size: 25px;
+  overflow-wrap: break-word;
+}
