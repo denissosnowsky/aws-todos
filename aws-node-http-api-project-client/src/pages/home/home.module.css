@@ -1,0 +1,40 @@
+.container {
+  display: flex !important;
+  width: 70% !important;
+  max-width: 70% !important;
+  padding-top: 50px;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inputWrapper {
+  width: 70%;
+  display: flex;
+  flex-direction: row;
+  align-items:flex-end;
+  margin: 0 auto;
+  margin-bottom: 50px;
+}
+
+.inputWrapper input {
+  font-size: 25px;
+}
+
+.inputWrapper label {
+  font-size: 20px;
+}
+
+.addButton {
+  margin-left: 10px;
+  color: green;
+  cursor: pointer;
+}
+
+.loadingWrapper{
+  height: 70vh;
+  width: 100%;
+}

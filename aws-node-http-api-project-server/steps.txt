@@ -1,0 +1,17 @@
+1. make account aws
+2. install aws cli to the computer
+3. create user in iam in aws website
+4. run 'aws configure' - fill user keys
+5. install globally - 'serverless' package
+6. run 'serverless' - choose 'http api'
+7. run 'serverless deploy' to deploy
+
+8. middleware library - @middy/core @middy/http-json-body-parser
+
+9. library for all aws - 'aws-sdk' (can fetch dynamodb for example - 'const dynamodb = new AWS.DynamoDB.DocumentClient()')
+10. Library for dynamodb - '@aws-sdk/client-dynamodb'
+11. Other library = '@aws-sdk/util-dynamodb'
+12. Other library = '@aws-sdk/util-dynamodb serverless-iam-roles-per-function'
+
+Client by react:
+13. library - 'amazon-cognito-identity-js' for authentication
